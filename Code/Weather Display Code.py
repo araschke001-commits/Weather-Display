@@ -165,12 +165,15 @@ def getWeather(lat, long, apiKey):
     response = urequests.get(url)
 
     if response.status_code == 401:
+        response.close()
         raise ValueError("API KEY")
 
     elif response.status_code == 429:
+        response.close()
         raise ValueError("RATE LIMIT")
 
     elif response.status_code != 200:
+        response.close()
         raise ValueError("API ERROR")
 
     data = response.json()
@@ -285,12 +288,11 @@ while True:
             temp, precip, iconName = getWeather(lat, long, apiKey)
 
         except ValueError as e:
-            apiFailed = True
-
             # Print error and whether or not retrying
             if tryNum < TRY_LIMIT - 1:
                 print(f"Error: {e}, retrying")
             else:
+                apiFailed = True
                 print(f"Error: {e}, exiting")
 
                 # Show on the screen that api failed to connect
@@ -316,6 +318,8 @@ while True:
             # Wait to give time to show the message
             time.sleep(5)
 
+            sys.exit(1)
+
         except Exception as e:
             apiFailed = True
             print(f"Unknown Error: {e}")
@@ -327,6 +331,8 @@ while True:
     
             # Wait to give time to show the message
             time.sleep(5)
+
+            sys.exit(1)
 
         else:
             # Print update
@@ -355,11 +361,51 @@ while True:
     length = len(str(precip))
     display.text(str(precip) + "%", centerX(length + 1, 31), centerY(1, 47))
 
-    # Make weather icon
-    drawIcon(iconName)
+    iconFailed = False
 
-    # Display update on screen
-    display.show()
+    # Make weather icon
+    try:
+        drawIcon(iconName)
+        
+        # Display update on screen
+        display.show()
+
+    except RuntimeError as e:
+        iconFailed = True
+        print(f"Icon Error: {e}")
+
+        # Show on the screen that api failed to connect
+        display.fill(0) # Clear screen
+        display.text("Icon\nError", centerX(5, 63), centerY(2, 31)) # Make text at roughly center
+        display.show() # Display text on screen
+
+        # Wait to give time to show the message
+        time.sleep(5)
+
+        sys.exit(1)
+
+    except Exception as e:
+        iconFailed = True
+        print(f"Unknown Error: {e}")
+
+        # Show on the screen that api failed to connect
+        display.fill(0) # Clear screen
+        display.text("Unknown\nError", centerX(7, 63), centerY(2, 31)) # Make text at roughly center
+        display.show() # Display text on screen
+
+        # Wait to give time to show the message
+        time.sleep(5)
+
+    finally:
+        if iconFailed == True:
+            # Turn off the screen
+            display.poweroff()
+    
+            # Turn off Wi-Fi fully
+            if wlan.isconnected():
+                wlan.disconnect()
+            wlan.active(False)
+
 
     ## Now we wait because... what's the rush for?
     # This weather is for the full day, not just a minute in advance.
