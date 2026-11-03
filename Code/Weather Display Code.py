@@ -1,6 +1,7 @@
 from machine import Pin, I2C
 from Modules import sh1106
 from Modules import urequests
+from Modules import weather_icons
 import network
 import time
 import json
@@ -84,11 +85,7 @@ display.show() # Display text on screen
 time.sleep_ms(500)
 
 
-## Weather Stuff ##
-
-ICON_SIZE = 56
-
-## ICONS HERE
+## Weather Functions ##
 
 # Returns name of weather icon
 def get_weather_icon(weather_id):
@@ -146,28 +143,54 @@ def getWeather(lat, long, apiKey):
 def drawIcon(icon):
     
     if icon == "sunny":
-        display.blit(sun_icon, 0, 8)
+        display.blit(weather_icons.sun_icon, 67, 3)
 
     elif icon == "partly cloudy":
-        display.blit(partly_icon, 0, 8)
+        display.blit(weather_icons.partly_icon, 67, 3)
 
     elif icon == "cloudy":
-        display.blit(cloud_icon, 0, 8)
+        display.blit(weather_icons.cloudy_icon, 67, 3)
 
     elif icon == "rain":
-        display.blit(rain_icon, 0, 8)
+        display.blit(weather_icons.rain_icon, 67, 3)
 
     elif icon == "storm":
-        display.blit(storm_icon, 0, 8)
+        display.blit(weather_icons.storm_icon, 67, 3)
 
     elif icon == "snow":
-        display.blit(snow_icon, 0, 8)
+        display.blit(weather_icons.snow_icon, 67, 3)
 
 
 
 ### Main loop ###
 
 while True:
+
+    ## Handle Wi-Fi reconnecting
+
+    # If Wi-Fi isn't connected, try to connect it again
+    if not wlan.isconnected():
+        # Show it is trying to connect
+        print("Reconnecting...")
+        display.fill(0) # Clear screen
+        display.text("Reconnecting...", centerX(15, 63), centerY(1, 31)) # Make text at roughly center
+        display.show() # Display text on screen
+
+        # Try to connect
+        wlan.connect(ssid, password)
+
+        # Wait for a second each time until connected
+        while not wlan.isconnected():
+            time.sleep(1)
+            
+        # Show it is connected properly
+        print("Connected")
+        display.fill(0) # Clear screen
+        display.text("Connected", centerX(9, 63), centerY(1, 31)) # Make text at roughly center
+        display.show() # Display text on screen
+
+        # Give time to let them see it is connected
+        time.sleep_ms(500)
 
     ## Weather variables from API
     # CHANGE VALUES TO ACTUAL VALUES OF LATITUDE, LONGITUDE, AND API KEY FROM OpenWeatherMap
@@ -195,6 +218,15 @@ while True:
     # Display update on screen
     display.show()
 
-    ## Wait because what's the rush?
+    ## Now we wait because... what's the rush for?
     # This weather is for the full day, not just a minute in advance.
+    # If you were to live life too quickly, you would not get all the benefits of it.
+    # The same is true for the board.
+    # If it doesn't wait for a minute (or 5) every once in a while,
+    # it will get bogged down with all of the busyness in life and not be able to enjoy it.
+    # The board has to slow down.
+    # It is unable to keep up with the business in life,
+    # and there is no point in doing so,
+    # since that slows it down even more and makes it unproductive.
+
     time.sleep(300) # Wait a full 5 minutes before giving next weather update
