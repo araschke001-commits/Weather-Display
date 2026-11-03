@@ -6,6 +6,18 @@ import network, time, json, sys
 
 ### Setup code ###
 
+## Variables ##
+
+# Credentials for Wi-Fi
+# CHANGE VALUES TO ACTUAL WIFI NAME AND PASSWORD
+ssid = "YOUR WIFI NAME"
+password = "YOUR WIFI PASSWORD"
+
+lat = 0
+long = 0
+apiKey = "YOUR API KEY"
+
+
 ## OLED ##
 
 # Function to return the x of the text centered at a point from the amount of letters
@@ -55,11 +67,6 @@ display.show() # Display text on screen
 
 # Try to connect #
 
-# Credentials for Wi-Fi
-# CHANGE VALUES TO ACTUAL WIFI NAME AND PASSWORD
-ssid = "YOUR WIFI NAME"
-password = "YOUR WIFI PASSWORD"
-
 WIFI_TIMEOUT = 30
 
 # Set up Wi-Fi
@@ -68,46 +75,55 @@ wlan.active(True)
 
 # If Wi-Fi isn't connected, try to connect it
 if not wlan.isconnected():
-    wlan.connect(ssid, password)
+
+    wifiFailed = False
 
     # Wait for a second each time until connected or timeout
-    seconds = 0
     try:
+        wlan.connect(ssid, password)
+        seconds = 0
         while not wlan.isconnected():
             if seconds >= WIFI_TIMEOUT:
                 raise RuntimeError("Wi-Fi Timed Out")
 
             time.sleep(1)
+
+            seconds += 1
+
     except RuntimeError as e:
+        wifiFailed = True
         print(f"Error: {e}")
 
-        # Signify an error happened and exit
-        sys.exit(1)
-    finally:
         # Show on the screen that wifi failed to connect
         display.fill(0) # Clear screen
-        display.text("Wi-Fi\nTimed Out", centerX(9, 63), centerY(3, 31)) # Make text at roughly center
+        display.text("Wi-Fi\nTimed Out", centerX(9, 63), centerY(2, 31)) # Make text at roughly center
         display.show() # Display text on screen
 
         # Wait to give time to show the message
         time.sleep(5)
 
-        # Turn off the screen
-        display.poweroff()
+        # Signify an error happened and exit
+        sys.exit(1)
 
-        # Turn off Wi-Fi fully
-        if wlan.isconnected():
-            wlan.disconnect()
-        wlan.active(False)
+    else:
+        # Show it is connected properly
+        print("Connected")
+        display.fill(0) # Clear screen
+        display.text("Connected", centerX(9, 63), centerY(1, 31)) # Make text at roughly center
+        display.show() # Display text on screen
 
-# Show it is connected properly
-print("Connected")
-display.fill(0) # Clear screen
-display.text("Connected", centerX(9, 63), centerY(1, 31)) # Make text at roughly center
-display.show() # Display text on screen
+        # Give time to let them see it is connected
+        time.sleep_ms(500)
 
-# Give time to let them see it is connected
-time.sleep_ms(500)
+    finally:
+        if wifiFailed:
+            # Turn off the screen
+            display.poweroff()
+
+            # Turn off Wi-Fi fully
+            if wlan.isconnected():
+                wlan.disconnect()
+            wlan.active(False)
 
 
 ## Weather Functions ##
@@ -149,8 +165,13 @@ def getWeather(lat, long, apiKey):
     response = urequests.get(url)
 
     if response.status_code == 401:
-        response.close()
-        raise ValueError("Invalid API key")
+        raise ValueError("API KEY")
+
+    elif response.status_code == 429:
+        raise ValueError("RATE LIMIT")
+
+    elif response.status_code != 200:
+        raise ValueError("API ERROR")
 
     data = response.json()
 
@@ -200,97 +221,128 @@ while True:
 
     ## Handle Wi-Fi reconnecting
 
-    # If Wi-Fi isn't connected, try to connect it again
+    # If Wi-Fi isn't connected, try to connect it
     if not wlan.isconnected():
-        # Show it is trying to connect
-        print("Reconnecting...")
-        display.fill(0) # Clear screen
-        display.text("Reconnecting...", centerX(15, 63), centerY(1, 31)) # Make text at roughly center
-        display.show() # Display text on screen
 
-        # Try to connect
-        wlan.connect(ssid, password)
+        wifiFailed = False
 
         # Wait for a second each time until connected or timeout
-        seconds = 0
         try:
+            wlan.connect(ssid, password)
+            seconds = 0
             while not wlan.isconnected():
                 if seconds >= WIFI_TIMEOUT:
                     raise RuntimeError("Wi-Fi Timed Out")
-    
+
                 time.sleep(1)
+
+                seconds += 1
+
         except RuntimeError as e:
+            wifiFailed = True
             print(f"Error: {e}")
-    
-            # Signify an error happened and exit
-            sys.exit(1)
-        finally:
+
             # Show on the screen that wifi failed to connect
             display.fill(0) # Clear screen
-            display.text("Wi-Fi\nTimed Out", centerX(9, 63), centerY(3, 31)) # Make text at roughly center
+            display.text("Wi-Fi\nTimed Out", centerX(9, 63), centerY(2, 31)) # Make text at roughly center
             display.show() # Display text on screen
-    
+
             # Wait to give time to show the message
             time.sleep(5)
-    
-            # Turn off the screen
-            display.poweroff()
-    
-            # Turn off Wi-Fi fully
-            if wlan.isconnected():
-                wlan.disconnect()
-            wlan.active(False)
-            
-        # Show it is connected properly
-        print("Connected")
-        display.fill(0) # Clear screen
-        display.text("Connected", centerX(9, 63), centerY(1, 31)) # Make text at roughly center
-        display.show() # Display text on screen
 
-        # Give time to let them see it is connected
-        time.sleep_ms(500)
+            # Signify an error happened and exit
+            sys.exit(1)
+
+        else:
+            # Show it is connected properly
+            print("Connected")
+            display.fill(0) # Clear screen
+            display.text("Connected", centerX(9, 63), centerY(1, 31)) # Make text at roughly center
+            display.show() # Display text on screen
+
+            # Give time to let them see it is connected
+            time.sleep_ms(500)
+
+        finally:
+            if wifiFailed:
+                # Turn off the screen
+                display.poweroff()
+
+                # Turn off Wi-Fi fully
+                if wlan.isconnected():
+                    wlan.disconnect()
+                wlan.active(False)
 
     ## Weather variables from API
 
     TRY_LIMIT = 3
 
     for tryNum in range(TRY_LIMIT):
-        try:
-            # CHANGE VALUES TO ACTUAL VALUES OF LATITUDE, LONGITUDE, AND API KEY FROM OpenWeatherMap
-            temp, precip, iconName = getWeather(0, 0, "API KEY")
 
-            # Successful attempt
-            break
-        except Exception as e:
+        apiFailed = False
+
+        try:
+            temp, precip, iconName = getWeather(lat, long, apiKey)
+
+        except ValueError as e:
+            apiFailed = True
+
             # Print error and whether or not retrying
             if tryNum < TRY_LIMIT - 1:
                 print(f"Error: {e}, retrying")
             else:
                 print(f"Error: {e}, exiting")
 
+                # Show on the screen that api failed to connect
+                display.fill(0) # Clear screen
+                display.text("API\nTimed Out", centerX(9, 63), centerY(2, 31)) # Make text at roughly center
+                display.show() # Display text on screen
+        
+                # Wait to give time to show the message
+                time.sleep(5)
+
                 # Exit while signaling an error happened
                 sys.exit(1)
-        finally:
-            # Show on the screen that wifi failed to connect
+
+        except OSError as e:
+            apiFailed = True
+            print(f"OS Error: {e}")
+
+            # Show on the screen that api failed to connect
             display.fill(0) # Clear screen
-            display.text("API Key\nTimed Out", centerX(9, 63), centerY(3, 31)) # Make text at roughly center
+            display.text("Network\nError", centerX(7, 63), centerY(2, 31)) # Make text at roughly center
             display.show() # Display text on screen
     
             # Wait to give time to show the message
             time.sleep(5)
+
+        except Exception as e:
+            apiFailed = True
+            print(f"Unknown Error: {e}")
+
+            # Show on the screen that api failed to connect
+            display.fill(0) # Clear screen
+            display.text("Unknown\nAPI Error", centerX(9, 63), centerY(2, 31)) # Make text at roughly center
+            display.show() # Display text on screen
     
-            # Turn off the screen
-            display.poweroff()
-    
-            # Turn off Wi-Fi fully
-            if wlan.isconnected():
-                wlan.disconnect()
-            wlan.active(False)
+            # Wait to give time to show the message
+            time.sleep(5)
+
+        else:
+            # Print update
+            print(f"Weather Update - Temp: {temp}, Precip: {precip}, Icon Name: {iconName}")
+            
+        finally:
+            if apiFailed:
+                # Turn off the screen
+                display.poweroff()
+        
+                # Turn off Wi-Fi fully
+                if wlan.isconnected():
+                    wlan.disconnect()
+                wlan.active(False)
 
     ## Display weather to screen (and print that it is updating)
-
-    # Print update
-    print(f"Weather Update, Temp: {temp}, Precip: {precip}, Icon Name: {iconName}")
 
     # Clear screen
     display.fill(0)
