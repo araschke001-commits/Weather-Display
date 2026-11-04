@@ -61,7 +61,10 @@ time.sleep_ms(500)
 ## Wi-Fi ##
 
 
+<<<<<<< HEAD
 # Tries to connect to wifi with the given ssid and passwords for an amount of attempts, handling wifi timing out and retrying a certain amount of attempts.
+=======
+>>>>>>> 3e659d4d9fd82d240f0d6f09791b7d9ea2d55998
 def wifiConnect(ssid, password, attempts=3):
     # Show it is trying to connect
     print("Connecting...")
