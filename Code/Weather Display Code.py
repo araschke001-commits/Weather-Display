@@ -61,10 +61,7 @@ time.sleep_ms(500)
 ## Wi-Fi ##
 
 
-<<<<<<< HEAD
 # Tries to connect to wifi with the given ssid and passwords for an amount of attempts, handling wifi timing out and retrying a certain amount of attempts.
-=======
->>>>>>> 3e659d4d9fd82d240f0d6f09791b7d9ea2d55998
 def wifiConnect(ssid, password, attempts=3):
     # Show it is trying to connect
     print("Connecting...")
@@ -102,7 +99,7 @@ def wifiConnect(ssid, password, attempts=3):
                 display.show() # Display text on screen
 
                 # Wait to give time to show the message
-                time.sleep(5)
+                time.sleep(1)
 
                 # If attempts are reached, signify an error happened and exit
                 if attempt >= attempts:
@@ -192,7 +189,7 @@ def getWorstIcon(iconNames):
         display.show() # Display text on screen
 
         # Wait to give time to show the message
-        time.sleep(5)
+        time.sleep(1)
 
         sys.exit(1)
 
@@ -331,7 +328,7 @@ while True:
                 display.show() # Display text on screen
         
                 # Wait to give time to show the message
-                time.sleep(5)
+                time.sleep(1)
 
                 # Exit while signaling an error happened
                 sys.exit(1)
@@ -346,7 +343,7 @@ while True:
             display.show() # Display text on screen
     
             # Wait to give time to show the message
-            time.sleep(5)
+            time.sleep(1)
 
             sys.exit(1)
 
@@ -360,7 +357,7 @@ while True:
             display.show() # Display text on screen
     
             # Wait to give time to show the message
-            time.sleep(5)
+            time.sleep(1)
 
             sys.exit(1)
             
@@ -409,7 +406,7 @@ while True:
         display.show() # Display text on screen
 
         # Wait to give time to show the message
-        time.sleep(5)
+        time.sleep(1)
 
         sys.exit(1)
 
@@ -423,7 +420,7 @@ while True:
         display.show() # Display text on screen
 
         # Wait to give time to show the message
-        time.sleep(5)
+        time.sleep(1)
 
     finally:
         if iconFailed == True:
