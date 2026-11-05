@@ -39,4 +39,4 @@ This is all you should need to make the Weather Display. The total comes to abou
 - 1x Plastic OLED Stabilizer - Keeps the OLED stable with less tension on it. (I'm printing it with Hack Club Printing Legion since I don't have a 3d printer)
 
 ## Reviewer Note
-For some reason, on the project page on Hack Club Half Life, the time for Hackatime isn't updating properly. It is showing 1.38h when the actual amount of time I spent on the project is closer to 7h. Could you please fix this error?
+For some reason, on the project page on Hack Club Half Life, the time for Hackatime isn't updating properly. It is showing 1.38h when the actual amount of time I spent on the project is closer to 7h. I changed the journals to include this missing time. Could you please look into this error?
