@@ -10,7 +10,7 @@
 
 | Week | Tier | Hours logged | Entries |
 | --- | --- | --- | --- |
-| Week 4 | Tier 1 | 10.19h | 7 |
+| Week 4 | Tier 1 | 11.34h | 7 |
 
 ## Contents
 
@@ -68,7 +68,7 @@ Then, I made most of the main program. For the setup, I could mainly just copy p
 
 ### 2026-11-03: In this session, I first made more parts of the code in the main program and then went on to debug for most of the time.
 
-**0.1h**
+**1.25h**
 
 In this session, I first made more parts of the code in the main program and then went on to debug for most of the time.
 
