@@ -10,7 +10,7 @@
 
 | Week | Tier | Hours logged | Entries |
 | --- | --- | --- | --- |
-| Week 4 | Tier 1 | 8.27h | 7 |
+| Week 4 | Tier 1 | 10.19h | 7 |
 
 ## Contents
 
@@ -86,13 +86,13 @@ Second, I debugged my code. I had to go through a few cycles of ask AI, fix the 
 
 ### 2026-11-05: In this session, I fixed all of the many bugs I found in my program and then worked on my readme.
 
-**0.1h**
+**2.02h**
 
 In this session, I fixed all of the many bugs I found in my program and then worked on my readme.
 
 First, I fixed the bugs in my code. I used AI to find the problems since I didn't have the board so I couldn't run the program. I found many errors with the wifiConnect() and getWeather() functions particularly and a few with other parts of my program, like the API loop. It was mainly a cycle of ask AI, fix bugs, ask AI, fix more bugs it gave, etc. One of these bugs was that the times weren't right for getting the weather for the day. I had to change it a lot to get it to actually do it for the rest of the current day rather than for 24h in advance or 5d. I also made a UTC offset so it was in local time rather than UTC, and I had to do a different method to get it to account for daylight savings.
 
-Second, I worked on my readme. I had to edit it quite a bit to meet the guidelines, importing the images and the stabilizer into the repo so those files could be there. I wrote quite a bit of information about the BOM and the different parts of it, and added a reviewer note about the Hackatime hours being incorrect.
+Second, I worked on my readme. I had to edit it quite a bit to meet the guidelines, importing the images and the stabilizer into the repo so those files could be there. I wrote quite a bit of information about the BOM and the different parts of it, and added a reviewer note about the Hackatime hours being incorrect. I also changed the journals to include the missing Hackatime hours.
 
 Images of my code:
 ![Weather Display Code getWeather Update](https://halflife.hackclub-assets.com/sessions/C7XTeoGu1WMIOvASw16iCwtNdoTXkQ5G/3ec28cd418d589cd603a72ba85e9fa32926f28e182f842c1df9a980d8733f2be.png)
