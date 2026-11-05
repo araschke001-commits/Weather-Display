@@ -18,6 +18,9 @@ lat = 0
 long = 0
 apiKey = "YOUR API KEY"
 
+# Offset to account for time zones, set to Central Time
+UTC_OFFSET_SECONDS = -6 * 3600
+
 
 ## OLED ##
 
@@ -63,17 +66,18 @@ time.sleep_ms(500)
 
 # Tries to connect to wifi with the given ssid and passwords for an amount of attempts, handling wifi timing out and retrying a certain amount of attempts.
 def wifiConnect(ssid, password, attempts=3):
-    # Show it is trying to connect
-    print("Connecting...")
-    display.fill(0) # Clear screen
-    display.text("Connecting...", centerX(13, 63), centerY(1, 31)) # Make text at roughly center
-    display.show() # Display text on screen
     
-    # Try to connect until the attempts limit has been reached #
-    for attempt in range(attempts):
+    # If Wi-Fi isn't connected, try to connect it
+    if not wlan.isconnected():
+
+        # Try to connect until the attempts limit has been reached #
+        for attempt in range(attempts):
         
-        # If Wi-Fi isn't connected, try to connect it
-        if not wlan.isconnected():
+            # Show it is trying to connect
+            print("Connecting...")
+            display.fill(0) # Clear screen
+            display.text("Connecting...", centerX(13, 63), centerY(1, 31)) # Make text at roughly center
+            display.show() # Display text on screen
 
             wifiFailed = False
 
@@ -102,7 +106,7 @@ def wifiConnect(ssid, password, attempts=3):
                 time.sleep(1)
 
                 # If attempts are reached, signify an error happened and exit
-                if attempt >= attempts:
+                if attempt == attempts - 1:
                     wifiFailed = True
                     sys.exit(1)
 
@@ -181,6 +185,7 @@ def getWorstIcon(iconNames):
         return iconOrder[worstIconIndex]
 
     except Exception as e:
+        iconFailed = True
         print(f"Worst Icon Error: {e}")
 
         # Show on the screen that api failed to connect
@@ -203,15 +208,17 @@ def getWorstIcon(iconNames):
                 wlan.disconnect()
             wlan.active(False)
 
-# Returns (temperature to 0.1, precipitation percent, weather icon name) for the current day
+# Returns (temperature to 1 deg, precipitation percent (0 -> 100), weather icon name) for the current day
 def getWeather(lat, long, apiKey):
     url = (
         "https://api.openweathermap.org/data/2.5/forecast"
-        "?lat=" + lat +
-        "&lon=" + long +
+        "?lat=" + str(lat) +
+        "&lon=" + str(long) +
         "&units=imperial"
         "&appid=" + apiKey
     )
+
+    response = None
 
     try:
 
@@ -219,17 +226,13 @@ def getWeather(lat, long, apiKey):
 
         # Bad API key
         if response.status_code == 401:
-            response.close()
             raise ValueError("Invalid API Key")
 
         # Other API errors
         if response.status_code != 200:
-            response.close()
             raise RuntimeError(str(response.status_code))
 
         data = response.json()
-
-        response.close()
 
         forecasts = data["list"]
 
@@ -237,14 +240,30 @@ def getWeather(lat, long, apiKey):
         icons = []
         precips = []
 
-        # Get temps, precips, and icons
+
+        utcOffset = data["city"]["timezone"]
+
+        localDay = time.gmtime(forecasts[0]["dt"] + utcOffset)[:3]
+
+        # Get temps, precips, and icons for a single day (8 entries * 3 hr entries = 24 hr)
         for entry in forecasts:
+
+            # New Day Handling #
+
+            # The day from the entry, in the format "YYYY-MM-DD" (example entry dt_txt: "2026-10-31 12:00")
+            entryDay = time.gmtime(entry["dt"] + utcOffset)[:3]
+
+            # If the entry day is different than the day for the first entry, it is a new day and to only get the forecast for the current day, stop getting forecast values
+            if entryDay != localDay:
+                break
+
+            # Retrieve forecast values for the 3hr period #
 
             temps.append(round(entry["main"]["temp"]))
 
             icons.append(getWeatherIcon(entry["weather"][0]["id"]))
 
-            precips.append(round(entry.get("pop", 0)))
+            precips.append(entry.get("pop", 0))
 
         # High temperature for the day
         temp = max(temps)
@@ -255,6 +274,8 @@ def getWeather(lat, long, apiKey):
             precip *= 1 - p
         precip = 1 - precip
 
+        precip = round(precip * 100)
+
         # Get the worst weather icon from the day
         icon = getWorstIcon(icons)
 
@@ -262,12 +283,23 @@ def getWeather(lat, long, apiKey):
 
     except ValueError as e:
         print(f"API Error: {e}")
+        raise
 
     except RuntimeError as e:
         print(f"API Runtime Error: {e}")
+        raise
+
+    except OSError as e:
+        print(f"API Network Error: {e}")
+        raise
 
     except Exception as e:
         print(f"API Unknown Error: {e}")
+        raise
+
+    finally:
+        if response is not None:
+            response.close()
 
 def drawIcon(icon):
     
@@ -313,14 +345,15 @@ while True:
 
         try:
             temp, precip, iconName = getWeather(lat, long, apiKey)
+            break
 
         except ValueError as e:
             # Print error and whether or not retrying
             if tryNum < TRY_LIMIT - 1:
-                print(f"Error: {e}, retrying")
+                print(f"Error (retrying): {e}")
             else:
                 apiFailed = True
-                print(f"Error: {e}, exiting")
+                print(f"Error (exiting): {e}")
 
                 # Show on the screen that api failed to connect
                 display.fill(0) # Clear screen
@@ -334,18 +367,23 @@ while True:
                 sys.exit(1)
 
         except OSError as e:
-            apiFailed = True
-            print(f"OS Error: {e}")
+            # Print error and whether or not retrying
+            if tryNum < TRY_LIMIT - 1:
+                print(f"OS Error (retrying): {e}")
+            else:
+                apiFailed = True
+                print(f"OS Error (exiting): {e}")
 
-            # Show on the screen that api failed to connect
-            display.fill(0) # Clear screen
-            display.text("Network\nError", centerX(7, 63), centerY(2, 31)) # Make text at roughly center
-            display.show() # Display text on screen
-    
-            # Wait to give time to show the message
-            time.sleep(1)
+                # Show on the screen that api failed to connect
+                display.fill(0) # Clear screen
+                display.text("Network\nError", centerX(7, 63), centerY(2, 31)) # Make text at roughly center
+                display.show() # Display text on screen
+        
+                # Wait to give time to show the message
+                time.sleep(1)
 
-            sys.exit(1)
+                # Exit while signaling an error happened
+                sys.exit(1)
 
         except Exception as e:
             apiFailed = True
@@ -422,6 +460,8 @@ while True:
         # Wait to give time to show the message
         time.sleep(1)
 
+        sys.exit(1)
+
     finally:
         if iconFailed == True:
             # Turn off the screen
@@ -433,15 +473,17 @@ while True:
             wlan.active(False)
 
 
-    ## Now we wait because... what's the rush for?
-    # This weather is for the full day, not just a minute in advance.
-    # If you were to live life too quickly, you would not get all the benefits of it.
-    # The same is true for the board.
-    # If it doesn't wait for a minute (or 5) every once in a while,
-    # it will get bogged down with all of the busyness in life and not be able to enjoy it.
-    # The board has to slow down.
-    # It is unable to keep up with the business in life,
-    # and there is no point in doing so,
-    # since that slows it down even more and makes it unproductive.
+    '''
+    Now we wait, because... what's the rush for?
+    This weather is for the full day, not just a minute in advance.
+    If you were to live life too quickly, you would not get all the benefits of it.
+    The same is true for the board.
+    If it doesn't wait for a minute (or 5) every once in a while,
+        it will get bogged down with all of the busyness in life and not be able to enjoy it.
+    The board has to slow down.
+    It is unable to keep up with the business in life,
+        and there is no point in doing so,
+        since that slows it down even more and makes it unproductive.
+    '''
 
     time.sleep(300) # Wait a full 5 minutes before giving next weather update
