@@ -38,5 +38,6 @@ This is all you should need to make the Weather Display. The total comes to abou
 - 1x Capacitor - Decoupling capacitor between GND and VDD. Can be included in PCBA
 - 1x Plastic OLED Stabilizer - Keeps the OLED stable with less tension on it. (I'm printing it with Hack Club Printing Legion since I don't have a 3d printer)
 
-## Reviewer Note
-For some reason, on the project page on Hack Club Half Life, the time for Hackatime isn't updating properly. It is showing 1.38h when the actual amount of time I spent on the project is closer to 7h. I changed the journals to include this missing time. Could you please look into this error?
+## Reviewer Note(s)
+- For some reason, on the project page on Hack Club Half Life, the time for Hackatime isn't updating properly. It is showing 1.38h when the actual amount of time I spent on the project is closer to 7h. I changed the journals to include this missing time. Could you please look into this error?
+- I set this project as tier 1 because I didn't know which of tier 1 and tier 2 it should be since the schematic and PCB are very simple but the code isn't quite as easy. I ended up choosing tier 1 since the part that dealt with the display was simple both in the PCB and the code and because of how simple the PCB was.
