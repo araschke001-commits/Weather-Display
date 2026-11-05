@@ -10,7 +10,7 @@
 
 | Week | Tier | Hours logged | Entries |
 | --- | --- | --- | --- |
-| Week 4 | Tier 1 | 11.34h | 7 |
+| Week 4 | Tier 1 | 12.87h | 7 |
 
 ## Contents
 
@@ -54,7 +54,7 @@ At the end of this, I did forget to add mounting holes to the PCB for the steel 
 
 ### 2026-11-02: In this session, I made all of the test programs to make sure that all of the components in my project are working and I made most of the main program for the Weather Display. I used a little AI to un
 
-**0.1h**
+**1.63h**
 
 In this session, I made all of the test programs to make sure that all of the components in my project are working and I made most of the main program for the Weather Display. I used a little AI to understand how everything worked and would fit together, but most of the code was me.
 
