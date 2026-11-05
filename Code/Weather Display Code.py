@@ -18,9 +18,6 @@ lat = 0
 long = 0
 apiKey = "YOUR API KEY"
 
-# Offset to account for time zones, set to Central Time
-UTC_OFFSET_SECONDS = -6 * 3600
-
 
 ## OLED ##
 
