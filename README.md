@@ -37,3 +37,6 @@ This is all you should need to make the Weather Display. The total comes to abou
 - 4x M2x5mm Steel Standoffs - They keep the PCB pin headers off the ground so bad things don't happen
 - 1x Capacitor - Decoupling capacitor between GND and VDD. Can be included in PCBA
 - 1x Plastic OLED Stabilizer - Keeps the OLED stable with less tension on it. (I'm printing it with Hack Club Printing Legion since I don't have a 3d printer)
+
+## Reviewer Note
+For some reason, on the project page on Hack Club Half Life, the time for Hackatime isn't updating properly. It is showing 1.38h when the actual amount of time I spent on the project is closer to 7h. Could you please fix this error?
